@@ -5,3 +5,7 @@
 .white-text {
   @apply text-[#d1d0c5];
 }
+
+.yellow-clr {
+  @apply text-[#e2b714];
+}
