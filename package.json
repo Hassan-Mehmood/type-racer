@@ -6,11 +6,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate:dev": "npx dotenv -e .env.development.local -- prisma migrate dev",
+    "db:push": "npx dotenv -e .env.development.local -- prisma db push",
+    "migrate:reset": "npx dotenv -e .env.development.local -- prisma migrate reset",
+    "db:seed": "npx dotenv -e .env.development.local -- prisma db seed",
+    "prisma:generate": "npx dotenv -e .env.development.local -- prisma generate",
+    "prisma:studio": "npx dotenv -e .env.development.local -- prisma studio",
+    "production:build": "npx prisma generate && npx prisma migrate deploy && next build"
   },
   "dependencies": {
+    "@prisma/client": "^5.7.1",
+    "@vercel/postgres": "^0.5.1",
+    "dotenv-cli": "^7.3.0",
     "lucide-react": "^0.301.0",
     "next": "14.0.4",
+    "prisma": "^5.7.1",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.49.2"
