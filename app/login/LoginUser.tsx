@@ -1,5 +1,4 @@
-import { LogIn, UserPlus } from 'lucide-react';
-import React from 'react';
+import { LogIn } from 'lucide-react';
 
 export default function LoginUser() {
   return (
