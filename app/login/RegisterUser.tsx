@@ -2,7 +2,9 @@
 
 import { UserPlus, X } from 'lucide-react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { registerUser } from '../actions';
+import { registerUser } from '../_actions';
+import { useFormStatus } from 'react-dom';
+import SubmitButton from './SubmitButton';
 
 export type RegisterInputs = {
   username: string;
@@ -20,8 +22,8 @@ export default function RegisterUser() {
     formState: { errors },
   } = useForm<RegisterInputs>();
 
-  const onSubmit: SubmitHandler<RegisterInputs> = (data) => {
-    registerUser(data);
+  const onSubmit: SubmitHandler<RegisterInputs> = async (data) => {
+    await registerUser(data);
     reset();
   };
 
@@ -97,11 +99,7 @@ export default function RegisterUser() {
           )}
         </div>
 
-        <button className="bg-[#2c2e31] py-2 w-full rounded-lg hover:bg-[#d1d0c5] hover:text-gray-900">
-          <span className="flex items-center justify-center gap-2">
-            <UserPlus /> Sign Up
-          </span>
-        </button>
+        <SubmitButton />
       </form>
     </div>
   );
