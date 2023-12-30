@@ -8,11 +8,16 @@ export default function SubmitButton() {
   return (
     <button
       disabled={pending}
-      className="bg-[#2c2e31] py-2 w-full rounded-lg hover:bg-[#d1d0c5] hover:text-gray-900 disabled:bg-red-400"
+      className="bg-[#2c2e31] py-2 w-full rounded-lg hover:bg-[#d1d0c5] hover:text-gray-900 focus:bg-[#d1d0c5] focus:text-gray-900 disabled:bg-[#494c50] disabled:text-[#d1d0c5] "
     >
-      {pending && 'Submitting'}
       <span className="flex items-center justify-center gap-2">
-        <UserPlus /> Sign Up
+        {pending ? (
+          'Pending'
+        ) : (
+          <>
+            <UserPlus /> Sign Up
+          </>
+        )}
       </span>
     </button>
   );

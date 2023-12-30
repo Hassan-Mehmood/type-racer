@@ -1,9 +1,9 @@
 'use client';
 
-import { UserPlus, X } from 'lucide-react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { X } from 'lucide-react';
 import { registerUser } from '../_actions';
-import { useFormStatus } from 'react-dom';
+import { useFormState } from 'react-dom';
+
 import SubmitButton from './SubmitButton';
 
 export type RegisterInputs = {
@@ -14,31 +14,20 @@ export type RegisterInputs = {
 };
 
 export default function RegisterUser() {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    formState: { errors },
-  } = useForm<RegisterInputs>();
-
-  const onSubmit: SubmitHandler<RegisterInputs> = async (data) => {
-    await registerUser(data);
-    reset();
-  };
+  const [state, formAction] = useFormState(registerUser, null);
 
   return (
     <div>
       <h2 className="mb-2">register</h2>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form action={formAction}>
         <div className="relative">
           <input
             className="bg-[#2c2e31] text-slate-300 text-sm mb-2 rounded-lg block w-full p-2.5"
             placeholder="username"
             defaultValue={''}
-            {...register('username', { required: true })}
+            name="username"
           />
-          {errors.username?.type === 'required' && (
+          {(state?.error?.username?._errors || state?.usernameExists) && (
             <p className="absolute right-2 top-2">
               <X color="#ca4754" />
             </p>
@@ -51,12 +40,9 @@ export default function RegisterUser() {
             className="bg-[#2c2e31] text-slate-300 text-sm mb-2 rounded-lg block w-full p-2.5"
             placeholder="email"
             defaultValue={''}
-            {...register('email', {
-              required: true,
-              pattern: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
-            })}
+            name="email"
           />
-          {(errors.email?.type === 'required' || errors.email?.type === 'pattern') && (
+          {(state?.error?.email?._errors || state?.emailExists) && (
             <p className="absolute right-2 top-2">
               <X color="#ca4754" />
             </p>
@@ -68,9 +54,9 @@ export default function RegisterUser() {
             className="bg-[#2c2e31] text-slate-300 text-sm mb-2 rounded-lg block w-full p-2.5"
             placeholder="password"
             defaultValue={''}
-            {...register('password', { required: true, minLength: 6 })}
+            name="password"
           />
-          {(errors.password?.type === 'required' || errors.password?.type === 'minLength') && (
+          {state?.error?.password?._errors && (
             <p className="absolute right-2 top-2">
               <X color="#ca4754" />
             </p>
@@ -83,16 +69,9 @@ export default function RegisterUser() {
             className="bg-[#2c2e31] text-slate-300 text-sm mb-2 rounded-lg block w-full p-2.5"
             placeholder="confirm password"
             defaultValue={''}
-            {...register('confirmPass', {
-              required: true,
-              validate: (val: string) => {
-                if (watch('password') != val) {
-                  return false;
-                }
-              },
-            })}
+            name="confirmPass"
           />
-          {(errors.confirmPass?.type === 'required' || errors.confirmPass?.type === 'validate') && (
+          {state?.error?.confirmPass?._errors && (
             <p className="absolute right-2 top-2">
               <X color="#ca4754" />
             </p>

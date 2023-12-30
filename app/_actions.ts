@@ -1,36 +1,61 @@
 'use server';
 
-import { RegisterInputs } from './login/RegisterUser';
 import prisma from '@/db/db';
+import { RegisterUserSchema } from '@/lib/schema';
+import bcrypt from 'bcrypt';
 
-export async function registerUser(formData: RegisterInputs) {
-  const { username, email, password, confirmPass } = formData;
+export async function registerUser(currentState: any, formData: FormData) {
+  const result = RegisterUserSchema.safeParse({
+    username: formData.get('username'),
+    email: formData.get('email'),
+    password: formData.get('password'),
+    confirmPass: formData.get('confirmPass'),
+  });
 
-  console.log(username, email, password, confirmPass);
+  if (!result.success) {
+    return { error: result.error.format() };
+  }
 
-  // if (
-  //   username.trim().length === 0 ||
-  //   email.trim().length === 0 ||
-  //   password.trim().length === 0 ||
-  //   confirmPass.trim().length === 0
-  // ) {
-  //   return;
-  // }
+  try {
+    const { username, email, password, confirmPass } = result.data;
 
-  // if (password.trim().length < 6) {
-  //   return;
-  // }
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          {
+            username,
+          },
+          {
+            email,
+          },
+        ],
+      },
+    });
 
-  // if (password.trim() !== confirmPass.trim()) {
-  //   return;
-  // }
+    if (existingUser?.username) {
+      return { emailExists: true };
+    }
 
-  // const newUser = await prisma.user.create({
-  //   data: {
-  //     username,
-  //     email,
-  //     password,
-  //     confirmPass,
-  //   },
-  // });
+    if (existingUser?.email) {
+      return { usernameExists: true };
+    }
+
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+
+    const hashPassword = await bcrypt.hash(password, salt);
+
+    await prisma.user.create({
+      data: {
+        username,
+        email,
+        password: hashPassword,
+        confirmPass: hashPassword,
+      },
+    });
+
+    //TODO: User should sign in when his account is created
+  } catch (error) {
+    throw new Error('Something went wrong');
+  }
 }
