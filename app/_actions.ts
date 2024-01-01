@@ -50,7 +50,6 @@ export async function registerUser(currentState: any, formData: FormData) {
         username,
         email,
         password: hashPassword,
-        confirmPass: hashPassword,
       },
     });
 
