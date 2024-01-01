@@ -5,18 +5,18 @@ import { RegisterUserSchema } from '@/lib/schema';
 import bcrypt from 'bcrypt';
 
 export async function registerUser(currentState: any, formData: FormData) {
-  const result = RegisterUserSchema.safeParse({
-    username: formData.get('username'),
-    email: formData.get('email'),
-    password: formData.get('password'),
-    confirmPass: formData.get('confirmPass'),
-  });
-
-  if (!result.success) {
-    return { error: result.error.format() };
-  }
-
   try {
+    const result = RegisterUserSchema.safeParse({
+      username: formData.get('username'),
+      email: formData.get('email'),
+      password: formData.get('password'),
+      confirmPass: formData.get('confirmPass'),
+    });
+
+    if (!result.success) {
+      return { error: result.error.format() };
+    }
+
     const { username, email, password, confirmPass } = result.data;
 
     const existingUser = await prisma.user.findFirst({
@@ -55,6 +55,6 @@ export async function registerUser(currentState: any, formData: FormData) {
 
     //TODO: User should sign in when his account is created
   } catch (error) {
-    throw new Error('Something went wrong');
+    throw new Error('Something unexpected happened');
   }
 }
