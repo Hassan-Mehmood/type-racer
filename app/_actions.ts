@@ -17,7 +17,7 @@ export async function registerUser(currentState: any, formData: FormData) {
       return { error: result.error.format() };
     }
 
-    const { username, email, password, confirmPass } = result.data;
+    const { username, email, password } = result.data;
 
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -32,12 +32,13 @@ export async function registerUser(currentState: any, formData: FormData) {
       },
     });
 
-    if (existingUser?.username) {
-      return { emailExists: true };
-    }
-
-    if (existingUser?.email) {
-      return { usernameExists: true };
+    if (existingUser) {
+      if (existingUser.username === username) {
+        return { usernameExists: true };
+      }
+      if (existingUser.email === email) {
+        return { emailExists: true };
+      }
     }
 
     const saltRounds = 10;
