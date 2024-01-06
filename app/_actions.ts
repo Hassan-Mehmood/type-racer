@@ -1,10 +1,12 @@
 'use server';
 
 import prisma from '@/db/db';
-import { RegisterUserSchema } from '@/lib/schema';
+import { getSession } from '@/lib/iron-session';
+import { LoginUserSchema, RegisterUserSchema } from '@/lib/schema';
 import bcrypt from 'bcrypt';
+import { revalidatePath } from 'next/cache';
 
-export async function registerUser(currentState: any, formData: FormData) {
+export async function registerUser(_: any, formData: FormData) {
   try {
     const result = RegisterUserSchema.safeParse({
       username: formData.get('username'),
@@ -55,6 +57,47 @@ export async function registerUser(currentState: any, formData: FormData) {
     });
 
     //TODO: User should sign in when his account is created
+  } catch (error) {
+    throw new Error('Something unexpected happened');
+  }
+}
+
+export async function loginUser(currentState: any, formData: FormData) {
+  try {
+    const result = LoginUserSchema.safeParse({
+      email: formData.get('email'),
+      password: formData.get('password'),
+    });
+
+    if (!result.success) {
+      return { error: result.error.format() };
+    }
+
+    const { email, password } = result.data;
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return { userNotExists: true };
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return { passwordNotMatch: true };
+    }
+
+    const session = await getSession();
+
+    session.username = user.username;
+    session.email = user.email;
+    session.isLoggedIn = true;
+
+    await session.save();
+
+    revalidatePath('/login');
   } catch (error) {
     throw new Error('Something unexpected happened');
   }

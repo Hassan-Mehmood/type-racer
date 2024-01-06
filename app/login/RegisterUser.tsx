@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { registerUser } from '../_actions';
 import { useFormState } from 'react-dom';
 
-import SubmitButton from './SubmitButton';
+import RegisterSubmitButton from './RegisterSubmitButton';
 
 
 
@@ -73,7 +73,7 @@ export default function RegisterUser() {
 					)}
 				</div>
 
-				<SubmitButton />
+				<RegisterSubmitButton />
 			</form>
 		</div>
 	);
