@@ -8,18 +8,20 @@ const defaultSession = {
   isLoggedIn: false,
 };
 
-export async function getSession() {
-  const session = await getIronSession<typeof defaultSession>(cookies(), {
-    password: process.env.COOKIES_SECRET!,
-    cookieName: 'typeracer_user_session',
+const cookiesOptions = {
+  password: process.env.COOKIES_SECRET!,
+  cookieName: 'typeracer_user_session',
 
-    cookieOptions: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 86400000, // Expires in 1 day
-    },
-  });
+  cookieOptions: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 86400000, // Expires in 1 day
+  },
+};
+
+export async function getSession() {
+  const session = await getIronSession<typeof defaultSession>(cookies(), cookiesOptions);
 
   if (!session.isLoggedIn) {
     session.username = defaultSession.username;
