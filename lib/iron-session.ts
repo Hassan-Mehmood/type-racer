@@ -1,22 +1,17 @@
+import { User } from '@prisma/client';
 import { getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 
-export interface SessionData {
-  username: string;
-  email: string;
-  isLoggedIn: boolean;
-}
-
-export const defaultSession: SessionData = {
+const defaultSession = {
   username: '',
   email: '',
   isLoggedIn: false,
 };
 
 export async function getSession() {
-  const session = await getIronSession<SessionData>(cookies(), {
+  const session = await getIronSession<typeof defaultSession>(cookies(), {
     password: process.env.COOKIES_SECRET!,
-    cookieName: 'session',
+    cookieName: 'typeracer_user_session',
 
     cookieOptions: {
       httpOnly: true,
@@ -33,4 +28,19 @@ export async function getSession() {
   }
 
   return session;
+}
+
+export async function createSession(user: User) {
+  const session = await getSession();
+
+  session.username = user.username;
+  session.email = user.email;
+  session.isLoggedIn = true;
+
+  await session.save();
+}
+
+export async function destroySession() {
+  const session = await getSession();
+  session.destroy();
 }

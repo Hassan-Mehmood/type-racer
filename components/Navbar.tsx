@@ -1,3 +1,4 @@
+import { logout } from '@/app/_actions';
 import { getSession } from '@/lib/iron-session';
 import { Crown, Keyboard, LogOut, User } from 'lucide-react';
 import Link from 'next/link';
@@ -27,9 +28,11 @@ export default async function Navbar() {
 						<User color="#646669" />
 						<p className='text-[#646669] text-sm'>{session?.username}</p>
 					</Link>
-					<Link className='cursor-pointer font-extrabold' href={'/logout'}>
-						<LogOut size={18} color="#646669" />
-					</Link>
+					<form action={logout}>
+						<button type='submit'>
+							<LogOut size={18} color="#646669" />
+						</button>
+					</form>
 				</div>
 			) : (
 				<div>

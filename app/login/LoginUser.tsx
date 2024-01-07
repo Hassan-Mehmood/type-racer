@@ -1,5 +1,6 @@
 'use client'
-import { LogIn, X } from 'lucide-react';
+
+import { X } from 'lucide-react';
 import { useFormState } from 'react-dom';
 import { loginUser } from '../_actions';
 import LoginSubmitButton from './LoginSubmitButton';
