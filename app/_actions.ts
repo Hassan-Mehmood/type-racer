@@ -1,8 +1,11 @@
 'use server';
 
 import prisma from '@/db/db';
-import { RegisterUserSchema } from '@/lib/schema';
-import bcrypt from 'bcrypt';
+import { compareHash, generateHash } from '@/lib/bcrypt';
+import { createSession, destroySession } from '@/lib/iron-session';
+import { LoginUserSchema, RegisterUserSchema } from '@/lib/schema';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 export async function registerUser(currentState: any, formData: FormData) {
   try {
@@ -21,14 +24,7 @@ export async function registerUser(currentState: any, formData: FormData) {
 
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          {
-            username,
-          },
-          {
-            email,
-          },
-        ],
+        OR: [{ username }, { email }],
       },
     });
 
@@ -41,12 +37,9 @@ export async function registerUser(currentState: any, formData: FormData) {
       }
     }
 
-    const saltRounds = 10;
-    const salt = await bcrypt.genSalt(saltRounds);
+    const hashPassword = await generateHash(password);
 
-    const hashPassword = await bcrypt.hash(password, salt);
-
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         username,
         email,
@@ -54,8 +47,50 @@ export async function registerUser(currentState: any, formData: FormData) {
       },
     });
 
-    //TODO: User should sign in when his account is created
+    createSession(user);
+    revalidatePath('/');
   } catch (error) {
     throw new Error('Something unexpected happened');
   }
+  redirect('/profile');
+}
+
+export async function loginUser(currentState: any, formData: FormData) {
+  try {
+    const result = LoginUserSchema.safeParse({
+      email: formData.get('email'),
+      password: formData.get('password'),
+    });
+
+    if (!result.success) {
+      return { error: result.error.format() };
+    }
+
+    const { email, password } = result.data;
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return { userNotExists: true };
+    }
+
+    const isMatch = await compareHash(password, user.password);
+
+    if (!isMatch) {
+      return { passwordNotMatch: true };
+    }
+
+    await createSession(user);
+    revalidatePath('/');
+  } catch (error) {
+    throw new Error('Something unexpected happened');
+  }
+  redirect('/profile');
+}
+
+export async function logout() {
+  await destroySession();
+  redirect('/');
 }

@@ -12,9 +12,7 @@ export const RegisterUserSchema = z
     path: ['confirmPass'],
   });
 
-// .object({
-//   username: z.string().min(1, 'Username is required'),
-//   email: z.string().email('Invalid eamil address'),
-//   password: z.string().min(6, 'Password must be greated than 6 characters'),
-//   confirmPass: z.string().min(6, 'Password must be greated than 6 characters'),
-// })
+export const LoginUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
